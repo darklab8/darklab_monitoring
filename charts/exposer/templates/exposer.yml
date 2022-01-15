@@ -1,0 +1,101 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.name -}}-conf
+data:
+  grafana-nginx.conf: |
+    upstream grafana {
+      server {{ .Values.url }};
+    }
+
+    server {
+      listen 80;
+      listen [::]:80;
+
+      server_tokens off;
+
+      location / {
+        
+{{- if .Values.passwd.enabled }}
+        auth_basic    "Private site";
+        auth_basic_user_file conf.d/passwd;
+{{- end }}
+
+        proxy_pass http://grafana;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+      }
+    }
+{{ if .Values.passwd.enabled }}
+  passwd: |
+    admin:$apr1$jKqvCMcd$YYRG/rlTV/B0dGbvW9jNQ0
+{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name -}}-exposer-service
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.nodePort }}
+  selector:
+    app: {{ .Values.name -}}-exposer-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name -}}-exposer-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name -}}-exposer-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name -}}-exposer-app
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.name -}}-exposer-app
+      {{ if .Values.nodeSelector.enabled }}
+      nodeSelector:
+        operational_tool: node_label
+      {{ end }}
+      volumes:
+        - name: configs
+          configMap:
+            name: {{ .Values.name -}}-conf
+      imagePullSecrets:
+        - name: dockercred
+      containers:
+        - name: {{ .Values.name -}}-exposer-ctr
+          image: nginx:1.21.4-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: configs
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: grafana-nginx.conf
+            {{ if .Values.passwd.enabled }}
+            - name: configs
+              mountPath: /etc/nginx/conf.d/passwd
+              subPath: passwd
+            {{ end }}
+            

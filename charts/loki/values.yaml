@@ -1,0 +1,31 @@
+loki-stack:
+  grafana:
+    enabled: true
+    # nodeSelector:
+    #   grafana: node_label
+    
+  prometheus:
+    enabled: true
+    alertmanager:
+      persistentVolume:
+        enabled: false
+      # nodeSelector:
+      #   alertmanager: node_label
+    server:
+      persistentVolume:
+        enabled: false
+      # nodeSelector:
+      #   prometheus: node_label
+    pushgateway:
+      # nodeSelector:
+      #   prometheus: node_label
+
+  loki:
+    # nodeSelector:
+    #   loki: node_label
+    config:
+      table_manager:
+        retention_deletes_enabled: true
+        retention_period: 336h
+
+
