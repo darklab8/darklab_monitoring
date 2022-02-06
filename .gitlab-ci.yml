@@ -13,7 +13,7 @@ deploying_container:
   script:
         - echo 123
         - mkdir ~/.kube
-        - echo $kubectl_config > ~/.kube/config
+        - echo "${kubectl_config}" > ~/.kube/config
         - kubectl get pods --all-namespaces
       # - docker ps
       # - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $gitlab_api_key
