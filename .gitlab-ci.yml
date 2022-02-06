@@ -11,12 +11,12 @@ deploying_container:
   variables:
     DOCKER_HOST: tcp://dind-service:2375
   script:
-        - echo 123
-        - mkdir ~/.kube
-        - echo "${kubectl_config}" > ~/.kube/config
-        - sleep 90
-        - kubectl get pods --all-namespaces
-      # - docker ps
-      # - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $gitlab_api_key
-      # - docker build --tag $PIPELINE_BUILDING .
-      # - docker push $PIPELINE_BUILDING
+    - echo 123
+    - mkdir ~/.kube
+    - echo "${kubectl_config}" > ~/.kube/config
+    - sleep 90
+    - kubectl get pods --all-namespaces
+  # - docker ps
+  # - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $gitlab_api_key
+  # - docker build --tag $PIPELINE_BUILDING .
+  # - docker push $PIPELINE_BUILDING
