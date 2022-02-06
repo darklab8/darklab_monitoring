@@ -14,7 +14,7 @@ deploying_container:
         - echo 123
         - mkdir ~/.kube
         - echo "${kubectl_config}" > ~/.kube/config
-        - sleep 30
+        - sleep 90
         - kubectl get pods --all-namespaces
       # - docker ps
       # - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $gitlab_api_key
