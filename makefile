@@ -11,9 +11,9 @@ grafana_password:
 
 grafana_connect:
 	set -x
-	kubectl port-forward service/loki-grafana 30001:80
+	kubectl port-forward --namespace=monitoring service/loki-grafana 30001:80
 
 prometheus_connect:
 	set -x
-	kubectl port-forward service/loki-prometheus-server 30002:80
+	kubectl port-forward --namespace=monitoring service/loki-prometheus-server 30002:80
 
